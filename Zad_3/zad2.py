@@ -58,14 +58,14 @@ if __name__ == '__main__':
 
 	text_input = Text(master, width=5, height=5)
 	text_input.grid(row=1, column=1, sticky=EW)
-	# text_output.insert(INSERT, "Test")
+	Label(master, text="Wpisz liczbę od 1-10 i naciśnij przycisk.").grid(row=2, column=1, sticky=EW)
 
 
 	exit_flag = False
 	threads = []
 	events = []
  
-	for index in range(4):
+	for index in range(1, 11):
 		events.append(threading.Event())
 		thread = threading.Thread(target=f, name=index, args=[events[index-1]])
 		threads.append(thread)
