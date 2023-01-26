@@ -6,7 +6,7 @@ from tkinter import *
 
 
 exit_event = threading.Event()
-def f(stop_event):
+def work_thread(stop_event):
     for letter in string.ascii_uppercase:
         if not stop_event.is_set():
             out = letter + str(threading.current_thread().name) + " "
@@ -24,16 +24,9 @@ def get_thread(threads, index):
         if thread.name == index:
             return thread
 
-def thread(e):
-	for letter in string.ascii_uppercase:
-		out = letter + str(e) + " "
-		text_output.insert(INSERT, out)
-		sleep(1)
-
 def thread_starter():
 	input = text_input.get("1.0", "end-1c")
 	start_thread(threads, input)
-	# print(input)
  
 def thread_stopper():
     input = text_input.get("1.0", "end-1c")
@@ -67,7 +60,7 @@ if __name__ == '__main__':
  
 	for index in range(1, 11):
 		events.append(threading.Event())
-		thread = threading.Thread(target=f, name=index, args=[events[index-1]])
+		thread = threading.Thread(target=work_thread, name=index, args=[events[index-1]])
 		threads.append(thread)
 
 
