@@ -19,7 +19,7 @@ if __name__ == '__main__':
 	threads = []
 
  
-	for index in range(1, 4):
+	for index in range(1, 11):
 		thread = threading.Thread(target=work_thread, name=index, args=(index,))
 		threads.append(thread)
 
