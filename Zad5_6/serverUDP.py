@@ -14,11 +14,10 @@ def echo_server(port):
     except socket.error as e: 
         print ("Error creating socket: %s" % e) 
         sys.exit(1) 
-    
+
     while True:
         print("Waiting for message")
-
-        data, address = sock.recvfrom(16)
+        data, address = sock.recvfrom(48)
         if not data:
             print("Client disconnected")
             break
