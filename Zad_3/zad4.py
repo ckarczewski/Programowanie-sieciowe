@@ -3,19 +3,17 @@ import threading
 from time import sleep
 import string
 from tkinter import *
+import asyncio
+import concurrent.futures
 
-
-exit_event = threading.Event()
+event = threading.Event()
 def work_thread(stop_event):
     for letter in string.ascii_uppercase:
         if not stop_event.is_set():
             out = letter + str(threading.current_thread().name) + " "
             text_output.insert(INSERT, out)
             sleep(1)
-
-def start_thread(threads, index):
-    get_thread(threads, index).start()
-    
+   
 def stop_thread(events, index):
     events[int(index)-1].set()
     
@@ -24,17 +22,12 @@ def get_thread(threads, index):
         if thread.name == index:
             return thread
 
-def thread_starter():
-	# input = text_input.get("1.0", "end-1c")
-	for thread in threads:
-		thread.start()
-		sleep(1)
-	# start_thread(threads, input)
- 
 def thread_stopper():
     input = text_input.get("1.0", "end-1c")
     stop_thread(events, input)
-
+    
+def my_function(number):
+    print(f"Wykonuję wątek nr {number}")
 if __name__ == '__main__':
 
 	master = Tk(className="Zad2") # main window
@@ -45,9 +38,6 @@ if __name__ == '__main__':
 
 	text_output = Text(master, width=30, height=20)
 	text_output.grid(row=0, column=0, columnspan=3, sticky=EW)
-
-	start = Button(master, text="Start", width=5, command = lambda:thread_starter())
-	start.grid(row=1, column=0, sticky=NW)
 
 	stop = Button(master, text="Stop", width=5, command=lambda:thread_stopper())
 	stop.grid(row=1, column=0, sticky=SW)
@@ -61,18 +51,22 @@ if __name__ == '__main__':
 	threads = []
 	events = []
  
-	for index in range(1, 4):
+	for index in range(1, 11):
 		events.append(threading.Event())
 		thread = threading.Thread(target=work_thread, name=index, args=[events[index-1]])
 		threads.append(thread)
-
-	# for thread in threads:
-	# 	thread.start()
-	# 	sleep(1)
-  
-	master.mainloop()
+	print(threads)
+	print(events)
  
-# Użyć tej asynchro żeby pierw odpalało się okno programu a potem dopiero wątki
+	for thread in threads:
+		thread.start()
+
+	with concurrent.futures.ThreadPoolExecutor() as executor:
+		executor.submit(concurrent.futures.wait, threads)
+
+
+	master.mainloop()
+	
 
 
 
