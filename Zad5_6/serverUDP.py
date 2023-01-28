@@ -18,7 +18,7 @@ def echo_server(port):
     while True:
         print("Waiting for message")
 
-        data, address = sock.recv(16)
+        data, address = sock.recvfrom(16)
         if not data:
             print("Client disconnected")
             break
@@ -28,7 +28,7 @@ def echo_server(port):
             break
         elif data:
             print(f"Message: {data}")
-            sock.send(data)
+            sock.sendto(data, address)
             print(f"Send data back to {address}")
             
 if __name__ == '__main__':
