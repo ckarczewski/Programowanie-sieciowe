@@ -1,34 +1,52 @@
 import socket
 import argparse 
 import sys
+import threading
 
-def echo_server(port):
+# class Server(self, port):
+#     def __init__(self, port):
+#         self.port = port
+    
+# Listen Thread
+def tcp_listener(sock):
+    global client_socket, address
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.listen()
+    except socket.error as e:
+        print ("Listener error: %s" % e) 
+    while True:   
+        client_socket, address = sock.accept()
+    # return client_socket, address
+
+# Client Thread
+def tcp_client(client_socket, address):
+    data = client_socket.recv(16)
+    if not data:
+        print("Client disconnected")
+    if data == "End":
+        print ("Closing connection to the server") 
+        client_socket.close()
+    elif data:
+        print(f"Message: {data}")
+        client_socket.send(data)
+        print(f"Send data back to {address}")
+    
+def tcp_server(port):
+    
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as e: 
         print ("Error creating socket: %s" % e) 
         sys.exit(1) 
-
+        
     try:
         sock.bind(("0.0.0.0", port))
     except socket.error as e: 
         print ("Error creating socket: %s" % e) 
         sys.exit(1) 
+    
 
-    while True:
-        print("Waiting for message")
-        data, address = sock.recvfrom(48)
-        if not data:
-            print("Client disconnected")
-            break
-        if data == "End":
-            print ("Closing connection to the server") 
-            sock.close()
-            break
-        elif data:
-            print(f"Message: {data}")
-            sock.sendto(data, address)
-            print(f"Send data back to {address}")
+    
             
 if __name__ == '__main__':
     while True:
@@ -37,9 +55,11 @@ if __name__ == '__main__':
             port = input('Enter a port ')
             port = int(port)
             print('Starting the server')
-            echo_server(port)
+            tcp_server(port)
+            listen_thread = threading.Thread(target=tcp_listener)
+            client_thread = threading.Thread(target=tcp_client)
         if command == 'stop':
-            echo_server.close()
+            tcp_server.close()
             print('Server stopped')
 
             break
