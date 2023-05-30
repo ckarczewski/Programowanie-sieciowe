@@ -4,7 +4,7 @@ import sys
 
 myHostName = socket.gethostname()
 HOST = socket.gethostbyname(myHostName)
-buffer_size = 36
+buffer_size = 10
 def echo_client(port):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
