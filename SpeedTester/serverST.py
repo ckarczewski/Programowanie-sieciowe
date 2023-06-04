@@ -14,17 +14,20 @@ def tcp_listener(sock):
     global client_socket, address
     global client_thread
     try:
+        print("próbuje słuchać")
         sock.listen()
     except socket.error as e:
         print ("Listener error: %s" % e) 
     while True:
         try:   
+            print("próbuje zaakceptować")
             client_socket, address = sock.accept()
         except socket.error as e:
             print("cant accept")  
         print(f"Connected with IP address: {address} ")
         client_thread = threading.Thread(target=tcp_client(client_socket,address))
         client_thread.start()
+        print("stworzyłem nowy wątek z klientem")
     # return client_socket, address
 
 # Client Thread
@@ -32,6 +35,7 @@ def tcp_client(client_socket, address):
     print("Ready to get message")
     while True:
         data = client_socket.recv(16)
+        print("jestem w pętli i otrzymałem dane")
         if not data:
             print("Client disconnected")
             client_socket.close()
@@ -44,21 +48,39 @@ def tcp_client(client_socket, address):
             print(f"Message: {data}")
             client_socket.send(data)
             print(f"Send data back to {address}")
+
+# TCP thread
+def tcp_server(port):
     
-# def tcp_server(port):
-    
-#     try:
-#         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     except socket.error as e: 
-#         print ("Error creating socket: %s" % e) 
-#         sys.exit(1) 
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    except socket.error as e: 
+        print ("Error creating socket: %s" % e) 
+        sys.exit(1) 
         
-#     try:
-#         sock.bind(("0.0.0.0", port))
-#     except socket.error as e: 
-#         print ("Error creating socket: %s" % e) 
-#         sys.exit(1) 
-    
+    try:
+        sock.bind(("0.0.0.0", port))
+    except socket.error as e: 
+        print ("Error creating socket: %s" % e) 
+        sys.exit(1) 
+    try:
+        print("próbuje słuchać")
+        sock.listen()
+    except socket.error as e:
+        print ("Listener error: %s" % e) 
+    while True:
+        try:  
+            print("próbuje zaakceptować") 
+            client_socket, address = sock.accept()
+        except socket.error as e:
+            print("cant accept") 
+             
+        print(f"Connected with IP address: {address} ")
+        client_thread = threading.Thread(target=tcp_client, args=(client_socket,address))
+        client_thread.start()
+        print("stworzyłem nowy wątek z klientem")
+
+
 
     
             
@@ -68,24 +90,12 @@ if __name__ == '__main__':
         if command == 'start':
             port = input('Enter a port ')
             port = int(port)
-            try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            except socket.error as e: 
-                print ("Error creating socket: %s" % e) 
-                sys.exit(1)
-            try:
-                sock.bind(("0.0.0.0", port))
-            except socket.error as e: 
-                print ("Error creating socket: %s" % e) 
-                sys.exit(1)
             print('Starting the server')
             # tcp_server(port)
-            listen_thread = threading.Thread(target=tcp_listener(sock))
-            # listen_thread.daemon = True
-            listen_thread.start()
+            tcp_ser = threading.Thread(target=tcp_server, args=(port,))
+            tcp_ser.start()
+            # tcp_ser.join()
         if command == 'stop':
-            tcp_server.close()
             print('Server stopped')
-
-            break
+            sys.exit(1)
     print('Application finished')
