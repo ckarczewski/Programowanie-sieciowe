@@ -2,9 +2,10 @@ import socket
 import argparse 
 import sys
 import threading
+import re
 
 connection_count = 0
-
+buffer_size = 0
 # class Server(self, port):
 #     def __init__(self, port):
 #         self.port = port
@@ -34,10 +35,18 @@ connection_count = 0
 # Client Thread
 def tcp_client(client_socket, address):
     global connection_count
+    global buffer_size
+    buffer_size = client_socket.recv(16)
+    print(buffer_size)
+    get_size = re.search("([0-9]+)", buffer_size.decode('utf-8'))
+    size = int(get_size[0])
+    print("bufor size: ",size)
     print("Ready to get message")
     while True:
-        data = client_socket.recv(16)
-        print("jestem w pętli i otrzymałem dane")
+        data = client_socket.recv(size)
+        data_len = len(data)
+        print(data_len)
+        print("jestem w pętli i otrzymałem dane, a bufor to: ", size)
         if not data:
             print("Client disconnected")
             client_socket.close()
@@ -104,9 +113,10 @@ def tcp_server(port):
 if __name__ == '__main__':
     while True:
         command = input('Enter a command (start, stop)')
-        if command == 'start':
-            port = input('Enter a port ')
-            port = int(port)
+        if command == 's':
+            # port = input('Enter a port ')
+            # port = int(port)
+            port = 6969
             print('Starting the server')
             # tcp_server(port)
             tcp_ser = threading.Thread(target=tcp_server, args=(port,))
