@@ -3,6 +3,7 @@ import argparse
 import sys
 import threading
 import re
+import time
 
 connection_count = 0
 buffer_size = 0
@@ -42,9 +43,15 @@ def tcp_client(client_socket, address):
     size = int(get_size[0])
     print("bufor size: ",size)
     print("Ready to get message")
+    total_data_len = 0
+    total_time = 0
     while True:
         data = client_socket.recv(size)
+        start_time = time.time()
+        
+        print("poczatku petli while ",data)
         data_len = len(data)
+        total_data_len += data_len
         print(data_len)
         print("jestem w pętli i otrzymałem dane, a bufor to: ", size)
         if not data:
@@ -52,8 +59,11 @@ def tcp_client(client_socket, address):
             client_socket.close()
             connection_count -= 1
             print("disc cc: ", connection_count)
+            transfer_speed = total_data_len / total_time
+            print(f"Otrzymano {total_data_len/1024}kb w czasie {round(total_time,6)}s z prędkością {transfer_speed}kb/sec")
+            
             break
-        if data == "End":
+        if data == "b'End'":
             print ("Closing connection to the server") 
             client_socket.close()
             connection_count -= 1
@@ -63,6 +73,12 @@ def tcp_client(client_socket, address):
             print(f"Message: {data}")
             client_socket.send(data)
             print(f"Send data back to {address}")
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print("czas przesłania jednej paczki w sec ", elapsed_time)
+        
+        total_time += elapsed_time
 
 # TCP thread
 def tcp_server(port):
