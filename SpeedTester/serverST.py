@@ -129,6 +129,9 @@ def udp_client(client_socket):
     total_time = 0
     while True:
         data, address = client_socket.recvfrom(buffer_size)
+        if data.startswith("SIZE:"):
+            total_data_len = 0
+            total_time = 0
         start_time = time.time()
         data_len = len(data)
         total_data_len += data_len
@@ -163,7 +166,11 @@ def udp_server(port):
         sock.bind(("0.0.0.0", port))
     except socket.error as e: 
         print ("Error creating socket: %s" % e) 
-        sys.exit(1) 
+        sys.exit(1)
+    
+    udp_client_thread = threading.Thread(target=udp_client, args=(sock, ))
+    udp_client_thread.start()
+    print("Stworzyłem wątek UDP")
     
             
 if __name__ == '__main__':
@@ -176,7 +183,9 @@ if __name__ == '__main__':
             print('Starting the server')
             # tcp_server(port)
             tcp_ser = threading.Thread(target=tcp_server, args=(port,))
+            udp_ser = threading.Thread(target=udp_server, args=(port,))
             tcp_ser.start()
+            udp_ser.start()
             # tcp_ser.join()
         if command == 'stop':
             print('Server stopped')
