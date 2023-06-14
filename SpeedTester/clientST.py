@@ -3,13 +3,19 @@ import argparse
 import sys
 import re
 import time
+import threading
 
 myHostName = socket.gethostname()
 HOST = socket.gethostbyname(myHostName)
 buffer_size = 10
+off_flag = False
+close_program_flag = False
           
 # TCP
 def tcp_connection(port, buffer_size):
+    global off_flag
+    global HOST
+    global close_program_flag
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as e: 
@@ -26,6 +32,7 @@ def tcp_connection(port, buffer_size):
     print (f"Status: {status_msg}")
     if status_msg == "BUSY":
         print("Server is BUSY")
+        off_flag = True
         sys.exit()
     elif status_msg == "READY":
         data_size_msg = "SIZE:"+buffer_size
@@ -33,10 +40,10 @@ def tcp_connection(port, buffer_size):
         message = fill_array(buffer_size)
         while True:
             if message:
-                if message == "End":
+                if close_program_flag:
                     print("Disconect")
                     sock.close()
-                    break
+                    sys.exit()
                 try: 
                     # Send data 
                     print (f"Sending: {message}") 
@@ -58,11 +65,14 @@ def tcp_connection(port, buffer_size):
                 except Exception as e: 
                     print (f"Other exception: {str(e)}") 
                     break
-            time.sleep(0)
+            time.sleep(3)
             
 
 # UDP
 def udp_connection(port, buffer_size):
+    global off_flag
+    global HOST
+    global close_program_flag
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     except socket.error as e: 
@@ -72,7 +82,10 @@ def udp_connection(port, buffer_size):
     message = fill_array(buffer_size)
     data_size_msg = "SIZE:"+buffer_size
     sock.sendto(data_size_msg.encode('utf-8'), server_address)
-    while True:     
+    while True:
+        if off_flag == True or close_program_flag == True:
+            sock.close()
+            sys.exit()     
         if message:
             try: 
                 # Send data 
@@ -84,7 +97,7 @@ def udp_connection(port, buffer_size):
             except Exception as e: 
                 print (f"Other exception: {str(e)}") 
                 break
-        time.sleep(0)
+        time.sleep(2)
 
 # data array
 def fill_array(n):
@@ -115,7 +128,15 @@ if __name__ == '__main__':
             nagle_flag = input('Enter a nagle flag y/n ')
             nagle_flag = nagle_flag
             print('Starting the server')
-
+            tcp_thread = threading.Thread(target=tcp_connection, args=(port,buffer_size))
+            # udp_thread = threading.Thread(target=udp_connection, args=(port,buffer_size))
+            tcp_thread.start()
+            # udp_thread.start()
+            close_program = input("Type x to close program")
+            if close_program == "x":
+                close_program_flag = True
+                sys.exit()
+            
         if command == 'stop':
             # echo_server.close()
             print('Server stopped')
