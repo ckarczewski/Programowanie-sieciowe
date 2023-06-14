@@ -49,11 +49,11 @@ def tcp_client(client_socket, address):
         data = client_socket.recv(buffer_size)
         start_time = time.time()
         
-        print("poczatku petli while ",data)
+        # print("poczatku petli while ",data)
         data_len = len(data)
         total_data_len += data_len
-        print(data_len)
-        print("jestem w pętli i otrzymałem dane, a bufor to: ", buffer_size)
+        # print(data_len)
+        print(f"jestem w pętli i otrzymałem dane: {data}, o długosci: {data_len}")
         if not data:
             print("Client disconnected")
             client_socket.close()
@@ -70,13 +70,14 @@ def tcp_client(client_socket, address):
             print("disc cc: ", connection_count)
             break
         elif data:
-            print(f"Message: {data}")
-            client_socket.send(data)
-            print(f"Send data back to {address}")
+            # print(f"Message: {data}")
+            # client_socket.send(data)
+            # print(f"Send data back to {address}")
+            pass
 
         end_time = time.time()
         elapsed_time = end_time - start_time
-        print("czas przesłania jednej paczki w sec ", elapsed_time)
+        # print("czas przesłania jednej paczki w sec ", elapsed_time)
         
         total_time += elapsed_time
 
@@ -114,7 +115,7 @@ def tcp_server(port):
             connection_count -= 1
             print("after busy cc: ",connection_count)
         else: 
-            msg = "Hello!!!"
+            msg = "READY"
             client_socket.send(msg.encode('utf-8'))
             print("Wysłałem wiadomość")  
             print(f"Connected with IP address: {address} ")
@@ -132,6 +133,7 @@ def udp_client(client_socket):
         if data.startswith("SIZE:"):
             total_data_len = 0
             total_time = 0
+
         start_time = time.time()
         data_len = len(data)
         total_data_len += data_len
@@ -145,6 +147,7 @@ def udp_client(client_socket):
         elif data == b'FINE':
             transfer_speed = total_data_len / total_time
             print(f"Otrzymano {total_data_len/1024}kb w czasie {round(total_time,6)}s z prędkością {transfer_speed}kb/sec od {address}") 
+            break
         end_time = time.time()
         elapsed_time = end_time - start_time
         print("czas przesłania jednej paczki w sec ", elapsed_time)
