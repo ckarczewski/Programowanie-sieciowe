@@ -7,7 +7,7 @@ import threading
 
 myHostName = socket.gethostname()
 HOST = socket.gethostbyname(myHostName)
-buffer_size = 10
+# buffer_size = 10
 off_flag = False
 close_program_flag = False
           
@@ -35,15 +35,14 @@ def tcp_connection(port, buffer_size):
         off_flag = True
         sys.exit()
     elif status_msg == "READY":
-        data_size_msg = "SIZE:"+buffer_size
+        data_size_msg = "SIZE:"+str(buffer_size)
+        print("buffer size?: ",buffer_size)
         sock.sendall(data_size_msg.encode('utf-8'))
         message = fill_array(buffer_size)
+        print("message is?:", message)
         while True:
             if message:
-                if close_program_flag:
-                    print("Disconect")
-                    sock.close()
-                    sys.exit()
+                
                 try: 
                     # Send data 
                     print (f"Sending: {message}") 
@@ -65,6 +64,10 @@ def tcp_connection(port, buffer_size):
                 except Exception as e: 
                     print (f"Other exception: {str(e)}") 
                     break
+            if close_program_flag:
+                    print("Disconect")
+                    sock.close()
+                    sys.exit()
             time.sleep(3)
             
 
@@ -80,7 +83,7 @@ def udp_connection(port, buffer_size):
         sys.exit(1) 
     server_address = (HOST, port)
     message = fill_array(buffer_size)
-    data_size_msg = "SIZE:"+buffer_size
+    data_size_msg = "SIZE:"+str(buffer_size)
     sock.sendto(data_size_msg.encode('utf-8'), server_address)
     while True:
         if off_flag == True or close_program_flag == True:
@@ -107,29 +110,29 @@ def fill_array(n):
     return data
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Socket Server Example') 
-    parser.add_argument(
-        '--port', action="store", dest="port", type=int, required=True) 
-    given_args = parser.parse_args()  
-    port = given_args.port 
+    # parser = argparse.ArgumentParser(
+    #     description='Socket Server Example') 
+    # parser.add_argument(
+    #     '--port', action="store", dest="port", type=int, required=True) 
+    # given_args = parser.parse_args()  
+    # port = given_args.port 
 # #####
     AddressRegex ="[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
     while True:
         command = input('Enter a command (start, stop)')
         if command == 'start':
-            address = input('Enter a address ')
+            # address = input('Enter a address ')
             # res = re.search(AddressRegex, address)
-            address = address
+            # address = address
             port = input('Enter a port ')
             port = int(port)
-            package_size = input('Enter a buffer size B')
+            package_size = input('Enter a buffer size B: ')
             package_size = int(package_size)
-            nagle_flag = input('Enter a nagle flag y/n ')
-            nagle_flag = nagle_flag
+            # nagle_flag = input('Enter a nagle flag y/n ')
+            # nagle_flag = nagle_flag
             print('Starting the server')
-            tcp_thread = threading.Thread(target=tcp_connection, args=(port,buffer_size))
-            # udp_thread = threading.Thread(target=udp_connection, args=(port,buffer_size))
+            tcp_thread = threading.Thread(target=tcp_connection, args=(port,package_size))
+            # udp_thread = threading.Thread(target=udp_connection, args=(port,package_size))
             tcp_thread.start()
             # udp_thread.start()
             close_program = input("Type x to close program")
