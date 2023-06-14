@@ -43,6 +43,7 @@ def tcp_client(client_socket, address):
     buffer_size = int(get_size[0])
     print("bufor size: ",buffer_size)
     print("Ready to get message")
+    # client_socket.send(("Bufor is set").encode("utf-8"))
     total_data_len = 0
     total_time = 0
     while True:
@@ -188,7 +189,7 @@ if __name__ == '__main__':
             tcp_ser = threading.Thread(target=tcp_server, args=(port,))
             udp_ser = threading.Thread(target=udp_server, args=(port,))
             tcp_ser.start()
-            udp_ser.start()
+            # udp_ser.start()
             # tcp_ser.join()
         if command == 'stop':
             print('Server stopped')

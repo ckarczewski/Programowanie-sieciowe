@@ -35,18 +35,23 @@ def tcp_connection(port, buffer_size):
         off_flag = True
         sys.exit()
     elif status_msg == "READY":
-        data_size_msg = "SIZE:"+str(buffer_size)
+        message = "SIZE:"+str(buffer_size)
         print("buffer size?: ",buffer_size)
-        sock.sendall(data_size_msg.encode('utf-8'))
-        message = fill_array(buffer_size)
+        # sock.sendall(data_size_msg.encode('utf-8'))
+        # back = sock.recv(24)
+        # print("bakc?: ",back)
+        
         print("message is?:", message)
         while True:
             if message:
-                
                 try: 
                     # Send data 
-                    print (f"Sending: {message}") 
-                    sock.sendall(message.encode('utf-8')) 
+                    if message.startswith("SIZE:"):
+                        sock.sendall(message.encode('utf-8'))
+                        message = fill_array(buffer_size)
+                    else:
+                        print (f"Sending: {message}") 
+                        sock.sendall(message.encode('utf-8')) 
                     # # Look for the response 
                     # amount_received = 0 
                     # amount_expected = len(message) 
@@ -106,7 +111,7 @@ def udp_connection(port, buffer_size):
 def fill_array(n):
     data = ""
     for i in range(n):
-        data += str(i)
+        data += "X"
     return data
 
 if __name__ == '__main__':
