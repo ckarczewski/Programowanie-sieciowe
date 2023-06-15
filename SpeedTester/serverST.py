@@ -54,14 +54,14 @@ def tcp_client(client_socket, address):
         data_len = len(data)
         total_data_len += data_len
         # print(data_len)
-        print(f"jestem w pętli i otrzymałem dane: {data}, o długosci: {data_len}")
+        print(f"TCP get data: {data}, o len: {data_len} from {address}")
         if not data:
-            print("Client disconnected")
+            print("TCP Client disconnected")
             client_socket.close()
             connection_count -= 1
             print("disc cc: ", connection_count)
             transfer_speed = total_data_len / total_time
-            print(f"Otrzymano {total_data_len/1024}kb w czasie {round(total_time,6)}s z prędkością {transfer_speed}kb/sec od {address}")
+            print(f"TCP Otrzymano {total_data_len/1024}kb w czasie {round(total_time,6)}s z prędkością {transfer_speed}kb/sec od {address}")
             
             break
         if data == "b'End'":
@@ -115,6 +115,7 @@ def tcp_server(port):
             client_socket.close()
             connection_count -= 1
             print("after busy cc: ",connection_count)
+            sys.exit()
         else: 
             msg = "READY"
             client_socket.send(msg.encode('utf-8'))
@@ -124,14 +125,21 @@ def tcp_server(port):
             client_thread.start()
             print("stworzyłem nowy wątek z klientem")
 
-# DUP Client Thread
+# UDP Client Thread
 def udp_client(client_socket):
     global buffer_size
     total_data_len = 0
     total_time = 0
+    buffer_size = 14
+    # msg_buffer_size, _ = client_socket.recvfrom(16)
+    # print(msg_buffer_size)
+    # get_size = re.search("([0-9]+)", msg_buffer_size.decode('utf-8'))
+    # buffer_size = int(get_size[0])
     while True:
         data, address = client_socket.recvfrom(buffer_size)
-        if data.startswith("SIZE:"):
+        if data.startswith(("SIZE:").encode("utf-8")):
+            get_size = re.search("([0-9]+)", data.decode('utf-8'))
+            buffer_size = int(get_size[0])
             total_data_len = 0
             total_time = 0
 
@@ -139,19 +147,20 @@ def udp_client(client_socket):
         data_len = len(data)
         total_data_len += data_len
         if not data:
-            print(f"Client {address} disconnected")
+            print(f"UDP Client {address} disconnected")
+            # sys.exit()
             break
         elif data:
-            print(f"UDP Message {data}")
-            client_socket.sendto(data, address)
-            print(f"Send data back to: {address}")
-        elif data == b'FINE':
+            print(f"UDP Message: {data.decode('utf-8')}, from {address}, len: {data_len}")
+            # client_socket.sendto(data, address)
+            # print(f"Send data back to: {address}")
+        if data.decode('utf-8') == "FINE":
             transfer_speed = total_data_len / total_time
-            print(f"Otrzymano {total_data_len/1024}kb w czasie {round(total_time,6)}s z prędkością {transfer_speed}kb/sec od {address}") 
-            break
+            print(f"UDP Otrzymano {total_data_len/1024}kb w czasie {round(total_time,6)}s z prędkością {transfer_speed}kb/sec od {address}") 
+            
         end_time = time.time()
         elapsed_time = end_time - start_time
-        print("czas przesłania jednej paczki w sec ", elapsed_time)
+        # print("czas przesłania jednej paczki w sec ", elapsed_time)
         
         total_time += elapsed_time
         
@@ -189,7 +198,7 @@ if __name__ == '__main__':
             tcp_ser = threading.Thread(target=tcp_server, args=(port,))
             udp_ser = threading.Thread(target=udp_server, args=(port,))
             tcp_ser.start()
-            # udp_ser.start()
+            udp_ser.start()
             # tcp_ser.join()
         if command == 'stop':
             print('Server stopped')
