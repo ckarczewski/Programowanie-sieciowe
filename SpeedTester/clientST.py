@@ -12,12 +12,16 @@ off_flag = False
 close_program_flag = False
           
 # TCP
-def tcp_connection(port, buffer_size):
+def tcp_connection(port, buffer_size, nagle_flag):
     global off_flag
     global HOST
     global close_program_flag
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if nagle_flag == "y":
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        elif nagle_flag == "n":
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as e: 
         print ("Error creating socket: %s" % e) 
         sys.exit(1) 
@@ -118,7 +122,7 @@ if __name__ == '__main__':
             port = int(port)
             package_size = input('Enter a buffer size B: ')
             package_size = int(package_size)
-            # nagle_flag = input('Enter a nagle flag y/n ')
+            # nagle_flag = input('Do you want turn off Nagle'a algorithm? y/n ')
             # nagle_flag = nagle_flag
             print('Starting the server')
             tcp_thread = threading.Thread(target=tcp_connection, args=(port,package_size))
