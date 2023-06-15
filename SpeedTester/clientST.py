@@ -50,7 +50,7 @@ def tcp_connection(port, buffer_size):
                         sock.sendall(message.encode('utf-8'))
                         message = fill_array(buffer_size)
                     else:
-                        print (f"Sending: {message}") 
+                        print (f"TCP Sending: {message}") 
                         sock.sendall(message.encode('utf-8')) 
                     # # Look for the response 
                     # amount_received = 0 
@@ -70,7 +70,7 @@ def tcp_connection(port, buffer_size):
                     print (f"Other exception: {str(e)}") 
                     break
             if close_program_flag:
-                    print("Disconect")
+                    print("Disconnect")
                     sock.close()
                     sys.exit()
             time.sleep(3)
@@ -91,20 +91,25 @@ def udp_connection(port, buffer_size):
     data_size_msg = "SIZE:"+str(buffer_size)
     sock.sendto(data_size_msg.encode('utf-8'), server_address)
     while True:
-        if off_flag == True or close_program_flag == True:
-            sock.close()
-            sys.exit()     
+            
         if message:
             try: 
                 # Send data 
                 sock.sendto(message.encode('utf-8'), server_address)
-                print (f"Sending: {message}") 
+                print (f"UDP Sending: {message}") 
             except socket.error as e: 
                 print (f"Socket error: {str(e)}")
                 break
             except Exception as e: 
                 print (f"Other exception: {str(e)}") 
                 break
+            
+        if off_flag == True or close_program_flag == True:
+            message = "FINE"
+            sock.sendto(message.encode('utf-8'), server_address)
+            sock.close()
+            print("UDP close")
+            sys.exit() 
         time.sleep(2)
 
 # data array
@@ -137,9 +142,9 @@ if __name__ == '__main__':
             # nagle_flag = nagle_flag
             print('Starting the server')
             tcp_thread = threading.Thread(target=tcp_connection, args=(port,package_size))
-            # udp_thread = threading.Thread(target=udp_connection, args=(port,package_size))
+            udp_thread = threading.Thread(target=udp_connection, args=(port,package_size))
             tcp_thread.start()
-            # udp_thread.start()
+            udp_thread.start()
             close_program = input("Type x to close program")
             if close_program == "x":
                 close_program_flag = True
