@@ -36,12 +36,9 @@ def tcp_connection(port, buffer_size):
         sys.exit()
     elif status_msg == "READY":
         message = "SIZE:"+str(buffer_size)
-        print("buffer size?: ",buffer_size)
-        # sock.sendall(data_size_msg.encode('utf-8'))
-        # back = sock.recv(24)
-        # print("bakc?: ",back)
+        # print("buffer size: ",buffer_size)
         
-        print("message is?:", message)
+        print("message is:", message)
         while True:
             if message:
                 try: 
@@ -50,19 +47,8 @@ def tcp_connection(port, buffer_size):
                         sock.sendall(message.encode('utf-8'))
                         message = fill_array(buffer_size)
                     else:
-                        print (f"TCP Sending: {message}") 
+                        # print (f"TCP Sending: {message}") 
                         sock.sendall(message.encode('utf-8')) 
-                    # # Look for the response 
-                    # amount_received = 0 
-                    # amount_expected = len(message) 
-                    # while amount_received < amount_expected: 
-                    #     data = sock.recv(24)
-                    #     if not data: 
-                    #         print("Server disconnected, can not send message")
-                    #         sock.close()
-                    #         break
-                    #     amount_received += len(data) 
-                    #     print (f"Received: {data}") 
                 except socket.error as e: 
                     print (f"Socket error: {str(e)}")
                     break
@@ -73,7 +59,7 @@ def tcp_connection(port, buffer_size):
                     print("Disconnect")
                     sock.close()
                     sys.exit()
-            time.sleep(3)
+            time.sleep(0)
             
 
 # UDP
@@ -96,7 +82,7 @@ def udp_connection(port, buffer_size):
             try: 
                 # Send data 
                 sock.sendto(message.encode('utf-8'), server_address)
-                print (f"UDP Sending: {message}") 
+                # print (f"UDP Sending: {message}") 
             except socket.error as e: 
                 print (f"Socket error: {str(e)}")
                 break
@@ -110,7 +96,7 @@ def udp_connection(port, buffer_size):
             sock.close()
             print("UDP close")
             sys.exit() 
-        time.sleep(2)
+        time.sleep(0)
 
 # data array
 def fill_array(n):
@@ -120,13 +106,7 @@ def fill_array(n):
     return data
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser(
-    #     description='Socket Server Example') 
-    # parser.add_argument(
-    #     '--port', action="store", dest="port", type=int, required=True) 
-    # given_args = parser.parse_args()  
-    # port = given_args.port 
-# #####
+
     AddressRegex ="[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
     while True:
         command = input('Enter a command (start, stop)')
