@@ -5,8 +5,8 @@ import re
 import time
 import threading
 
-# myHostName = socket.gethostname()
-# HOST = socket.gethostbyname(myHostName)
+myHostName = socket.gethostname()
+HOST = socket.gethostbyname(myHostName)
 # buffer_size = 10
 off_flag = False
 close_program_flag = False
@@ -115,49 +115,21 @@ if __name__ == '__main__':
     while True:
         command = input('Enter a command (start, stop)')
         if command == 'start':
-            while True:
-                address = input('Enter a address ')
-                if re.search(AddressRegex, address):
-                    HOST = address
-                    break
-                else:
-                    print("It is not IP address")
-            while True:
-                port = input('Enter a port ')
-                if len(port) == 4:
-                    try:
-                        int(port)
-                        break
-                    except:
-                        print("Port should be Int")
-                else:
-                   print("Port should contain 4 numbers") 
-            while True:
-                package_size = input('Enter a buffer size B: ')
-                int_f = False
-                try:
-                    int(package_size)
-                    int_f = True
-                except:
-                    print("Buffer size should be Int")
-                if int_f:
-                    if int(package_size) <= 1048576:
-                        break
-                    else:
-                        print("Buffer size is to big")
-                
-            while True:
-                nagle_flag = input('Do you want turn off Naglea algorithm? y/n ')
-                if nagle_flag == "y" or nagle_flag == "n":
-                    break
-                else:
-                    print("Type wrong letter")
+            # address = input('Enter a address ')
+            # res = re.search(AddressRegex, address)
+            # address = address
+            port = input('Enter a port ')
+            port = int(port)
+            package_size = input('Enter a buffer size B: ')
+            package_size = int(package_size)
+            # nagle_flag = input('Do you want turn off Nagle'a algorithm? y/n ')
+            # nagle_flag = nagle_flag
             print('Starting the server')
-            tcp_thread = threading.Thread(target=tcp_connection, args=(port,package_size, nagle_flag))
+            tcp_thread = threading.Thread(target=tcp_connection, args=(port,package_size))
             udp_thread = threading.Thread(target=udp_connection, args=(port,package_size))
             tcp_thread.start()
             udp_thread.start()
-            close_program = input("Type x to close program: ")
+            close_program = input("Type x to close program")
             if close_program == "x":
                 close_program_flag = True
                 sys.exit()
