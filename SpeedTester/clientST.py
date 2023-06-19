@@ -1,6 +1,6 @@
 import socket
 import argparse 
-import sys
+import sys, os
 import re
 import time
 import threading
@@ -26,13 +26,13 @@ def tcp_connection(port, buffer_size, nagle_flag):
             pass
     except socket.error as e: 
         print ("Error creating socket: %s" % e) 
-        sys.exit(1) 
+        sys.exit() 
 
     try:
         sock.connect((HOST, port))
     except socket.error as e:
         print (f"Can not connect: {str(e)}")
-        sys.exit(1)
+        sys.exit()
     
     status_msg = sock.recv(24).decode('utf-8')
     print (f"Status: {status_msg}")
@@ -79,7 +79,7 @@ def udp_connection(port, buffer_size):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     except socket.error as e: 
         print ("Error creating socket: %s" % e) 
-        sys.exit(1) 
+        sys.exit() 
     server_address = (HOST, port)
     while True:
         if busy_flag:
@@ -152,10 +152,10 @@ if __name__ == '__main__':
                 except:
                     print("Buffer size should be Int")
                 if int_f:
-                    if int(package_size) <= 1048576:
+                    if int(package_size)>=4 and int(package_size) <= 1048576:
                         break
                     else:
-                        print("Buffer size is to big")
+                        print("4 <= Buffer size <= 1048576")
                 
             while True:
                 nagle_flag = input('Do you want turn off Naglea algorithm? y/n ')
@@ -171,7 +171,8 @@ if __name__ == '__main__':
             close_program = input("Type x to close program: ")
             if close_program == "x":
                 close_program_flag = True
-                sys.exit()
+                # sys.exit()
+                os._exit(1)
             
         if command == 'stop':
             # echo_server.close()
