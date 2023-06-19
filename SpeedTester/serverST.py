@@ -22,9 +22,10 @@ def tcp_client(client_socket, address):
 
     total_data_len = 0
     total_time = 0
+    start_time = time.perf_counter()
     while True:
         data = client_socket.recv(buffer_size)
-        start_time = time.time()
+        # start_time = time.perf_counter()
         data_len = len(data)
         total_data_len += data_len
      
@@ -33,15 +34,21 @@ def tcp_client(client_socket, address):
             client_socket.close()
             connection_count -= 1
             print("Disconnect  C-count: ", connection_count)
+            
+            end_time = time.perf_counter()
+            elapsed_time = end_time - start_time      
+            total_time = elapsed_time
+            
             transfer_speed = total_data_len/1024 / total_time
             print(f"TCP Otrzymano {round(total_data_len/1024)}kb w czasie {round(total_time,1)}s z prędkością {round(transfer_speed,1)}kb/sec od {address}")
             break
         # elif data:
         #     print(f"TCP Message: {data.decode('utf-8')}, len: {data_len}, from {address}")
 
-        end_time = time.time()
-        elapsed_time = end_time - start_time      
-        total_time += elapsed_time
+
+        # end_time = time.perf_counter()
+        # elapsed_time = end_time - start_time      
+        # total_time += elapsed_time
 
 # TCP thread
 def tcp_server(port):
@@ -78,7 +85,7 @@ def tcp_server(port):
             client_socket.close()
             connection_count -= 1
             print("after busy cc: ",connection_count)
-            sys.exit()
+            # sys.exit()
         else: 
             msg = "READY"
             client_socket.send(msg.encode('utf-8'))
@@ -100,27 +107,31 @@ def udp_client(client_socket):
         if data.startswith(("SIZE:").encode("utf-8")):
             get_size = re.search("([0-9]+)", data.decode('utf-8'))
             buffer_size = int(get_size[0])
+            print("buffer size=", buffer_size)
             total_data_len = 0
             total_time = 0
+            start_time = time.perf_counter()
 
-        start_time = time.time()
+        
         data_len = len(data)
         total_data_len += data_len
         
         if data.decode('utf-8') == "FINE":
+            end_time = time.perf_counter()
+            elapsed_time = end_time - start_time
+            total_time = elapsed_time
             transfer_speed = total_data_len/1024 / total_time
             print(f"UDP Otrzymano {round(total_data_len/1024)}kb w czasie {round(total_time,1)}s z prędkością {round(transfer_speed,1)}kb/sec od {address}") 
             buffer_size = 14
         if not data:
             print(f"UDP Client {address} disconnected")
-            # sys.exit()
             break
         # elif data:
         #     print(f"UDP Message: {data.decode('utf-8')}, len: {data_len}, from {address}")
         
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        total_time += elapsed_time
+        # end_time = time.perf_counter()
+        # elapsed_time = end_time - start_time
+        # total_time += elapsed_time
         
 
 

@@ -8,20 +8,22 @@ import threading
 # myHostName = socket.gethostname()
 # HOST = socket.gethostbyname(myHostName)
 # buffer_size = 10
-off_flag = False
+ready_flag = False
+busy_flag = False
 close_program_flag = False
           
 # TCP
 def tcp_connection(port, buffer_size, nagle_flag):
-    global off_flag
+    global ready_flag
+    global busy_flag
     global HOST
     global close_program_flag
     try:
-        if nagle_flag == "y":
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if nagle_flag == "y":      
             sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         elif nagle_flag == "n":
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            pass
     except socket.error as e: 
         print ("Error creating socket: %s" % e) 
         sys.exit(1) 
@@ -35,10 +37,12 @@ def tcp_connection(port, buffer_size, nagle_flag):
     status_msg = sock.recv(24).decode('utf-8')
     print (f"Status: {status_msg}")
     if status_msg == "BUSY":
-        print("Server is BUSY")
-        off_flag = True
+        print("TCP close Server is BUSY")
+        busy_flag = True
+        sock.close()
         sys.exit()
     elif status_msg == "READY":
+        ready_flag = True
         message = "SIZE:"+str(buffer_size)
         # print("buffer size: ",buffer_size)
         
@@ -60,7 +64,7 @@ def tcp_connection(port, buffer_size, nagle_flag):
                     print (f"Other exception: {str(e)}") 
                     break
             if close_program_flag:
-                    print("Disconnect")
+                    print("TCP Disconnect")
                     sock.close()
                     sys.exit()
             time.sleep(0)
@@ -68,7 +72,7 @@ def tcp_connection(port, buffer_size, nagle_flag):
 
 # UDP
 def udp_connection(port, buffer_size):
-    global off_flag
+    global ready_flag
     global HOST
     global close_program_flag
     try:
@@ -77,6 +81,13 @@ def udp_connection(port, buffer_size):
         print ("Error creating socket: %s" % e) 
         sys.exit(1) 
     server_address = (HOST, port)
+    while True:
+        if busy_flag:
+            sock.close()
+            print("UDP Close server busy")
+            sys.exit()
+        if ready_flag:
+            break
     message = fill_array(buffer_size)
     data_size_msg = "SIZE:"+str(buffer_size)
     sock.sendto(data_size_msg.encode('utf-8'), server_address)
@@ -94,7 +105,7 @@ def udp_connection(port, buffer_size):
                 print (f"Other exception: {str(e)}") 
                 break
             
-        if off_flag == True or close_program_flag == True:
+        if close_program_flag == True:
             message = "FINE"
             sock.sendto(message.encode('utf-8'), server_address)
             sock.close()
@@ -126,7 +137,7 @@ if __name__ == '__main__':
                 port = input('Enter a port ')
                 if len(port) == 4:
                     try:
-                        int(port)
+                        port = int(port)
                         break
                     except:
                         print("Port should be Int")
@@ -136,7 +147,7 @@ if __name__ == '__main__':
                 package_size = input('Enter a buffer size B: ')
                 int_f = False
                 try:
-                    int(package_size)
+                    package_size = int(package_size)
                     int_f = True
                 except:
                     print("Buffer size should be Int")
