@@ -171,7 +171,9 @@ if __name__ == '__main__':
             close_program = input("Type x to close program: ")
             if close_program == "x":
                 close_program_flag = True
-                # sys.exit()
+                sys.exit()
+                # os._exit(1)
+            if close_program == "z":
                 os._exit(1)
             
         if command == 'stop':
