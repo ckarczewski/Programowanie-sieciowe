@@ -168,7 +168,8 @@ if __name__ == '__main__':
             udp_thread = threading.Thread(target=udp_connection, args=(port,package_size))
             tcp_thread.start()
             udp_thread.start()
-            close_program = input("Type x to close program: ")
+            time.sleep(2)
+            close_program = input("Type x to close program or z to close hard: ")
             if close_program == "x":
                 close_program_flag = True
                 sys.exit()

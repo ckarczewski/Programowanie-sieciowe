@@ -76,7 +76,7 @@ def tcp_server(port):
         try:
             client_socket, address = sock.accept()
             connection_count += 1
-            print("After 1st con cc: ", connection_count)
+            # print("After 1st con cc: ", connection_count)
         except socket.error as e:
             print("cant accept", e)
         if connection_count > 1:
@@ -84,8 +84,7 @@ def tcp_server(port):
             client_socket.send(msg.encode('utf-8'))
             client_socket.close()
             connection_count -= 1
-            print("after busy cc: ",connection_count)
-            # sys.exit()
+            # print("after busy cc: ",connection_count)
         else: 
             msg = "READY"
             client_socket.send(msg.encode('utf-8'))
@@ -159,17 +158,26 @@ def udp_server(port):
 if __name__ == '__main__':
     while True:
         command = input('Enter a command (start, stop)')
-        if command == 's':
-            # port = input('Enter a port ')
-            # port = int(port)
-            port = 6969
+        if command == 'start':
+            while True:
+                port = input('Enter a port ')
+                if len(port) == 4:
+                    try:
+                        port = int(port)
+                        break
+                    except:
+                        print("Port should be Int")
+                else:
+                   print("Port should contain 4 numbers") 
+
+            # port = 6969
             print('Starting the server')
-            # tcp_server(port)
+
             tcp_ser = threading.Thread(target=tcp_server, args=(port,))
             udp_ser = threading.Thread(target=udp_server, args=(port,))
             tcp_ser.start()
             udp_ser.start()
-            # tcp_ser.join()
+
         if command == 'stop':
             print('Server stopped')
             os._exit(1)
